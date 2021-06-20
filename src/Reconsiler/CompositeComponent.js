@@ -1,5 +1,6 @@
 import { instantiateComponent } from "./index";
 
+//TODO доработать обработку компонентов
 export class CompositeComponent {
   constructor(element) {
     this.element = element;
@@ -9,8 +10,10 @@ export class CompositeComponent {
 
   mount() {
     const { tagName: Component, props } = this.element;
-    this.component = instantiateComponent(Component(props));
-    return this.component.mount();
+    this.rendereElement = Component(props);
+    this.component = instantiateComponent(this.rendereElement);
+    this.node = this.component.mount();
+    return this.node;
   }
 
   unmount() {
@@ -18,13 +21,10 @@ export class CompositeComponent {
   }
 
   receive(currentElement, nextElement) {
-    const { tagName: Component } = this.element;
-    const nextProps = nextElement.props;
+    const { tagName: Component } = nextElement;
+    const nextRenderedElement = Component(nextElement.props);
 
-    this.rendereElement = Component(nextProps);
-
-    if (this.rendereElement.tagName === this.rendereElement.tagName) {
-      currentElement.receive(currentElement, this.rendereElement);
-    }
+    this.component.receive(this.rendereElement, nextRenderedElement);
+    this.component.node = this.node;
   }
 }

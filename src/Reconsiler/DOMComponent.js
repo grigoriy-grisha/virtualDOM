@@ -1,5 +1,6 @@
 import { createDOMNode } from "../virtualDom/createDOMVNode";
 import { patcher } from "../Patcher";
+
 export class DOMComponent {
   constructor(element) {
     this.element = element;

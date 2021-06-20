@@ -7,7 +7,9 @@ export const createDOMNode = (vNode) => {
   const { tagName, props, children } = vNode;
 
   const node = document.createElement(tagName);
+
   patcher.patchProps(node, {}, props);
+  // console.log(children);
   children.forEach((child) => node.appendChild(createDOMNode(child)));
 
   return node;

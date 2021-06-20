@@ -1,13 +1,11 @@
 import { createVNode } from "./virtualDom/createVNode";
-import { patcher } from "./Patcher";
-import { $ } from "./Dom";
-import { mount, update } from "./Mount";
-// import { mount } from "./Mount";
+import { DOM } from "./Dom";
 
 /** @jsx createVNode */
 
+//TODO хуки нужно привязывать к компонентам, но компонеты не стабильны :(
 let isFirst = true;
-let value = "";
+let value;
 
 function useState(initialValue) {
   if (isFirst) {
@@ -17,47 +15,68 @@ function useState(initialValue) {
 
   function setState(newValue) {
     value = newValue;
-    mount(createVApp(store), document.getElementById("app"));
+    DOM.mount(<App />, document.getElementById("app"));
   }
 
   return [value, setState];
 }
 
-const createVApp = (store) => {
-  const [value, setValue] = useState("");
-  const { count } = store.state;
-  const decrement = () => store.setState({ count: store.state.count - 1 });
-  const increment = () => store.setState({ count: store.state.count + 1 });
+const store = {
+  data: [1, 2, 3, 4, 123, 123, 123],
+};
 
+function withStore(store) {
+  const newStore = new Proxy(store, {
+    set: function (item, property, value, itemProxy) {
+      item[property] = value;
+      setTimeout(() => DOM.mount(<App />, document.getElementById("app")));
+      return true;
+    },
+  });
+
+  return (Component) => {
+    return (props, children) => {
+      return (
+        <Component {...props} store={newStore}>
+          {children}
+        </Component>
+      );
+    };
+  };
+}
+
+const FilterWidget = withStore(store)(({ data, store }, [children]) => {
   return (
-    <div {...{ class: "container", "data-count": String(count) }}>
-      <h1>Hello, Virtual DOM</h1>
-      {value === "asd" ? "a" : "asdasd"}
-      <div>Count: {String(count)}</div>
-      Text node without tags
-      <img src="https://i.ibb.co/M6LdN5m/2.png" width="200" />
-      <button onclick={decrement}>-1</button>
-      <button onclick={increment}>+1</button>
-      <input
-        type="text"
-        value={value}
-        oninput={({ target }) => setValue(target.value)}
-      />
+    <div>
+      <div
+        onclick={() =>
+          (store.data = store.data.filter((item) => item % 2 === 0))
+        }
+      >
+        CLICK!
+      </div>
+      {children[0](store.data)}
+    </div>
+  );
+});
+
+const VisualWidget = ({ template, data }) => {
+  return data.map((dataElem) => template(dataElem));
+};
+
+const App = () => {
+  return (
+    <div>
+      <FilterWidget>
+        {(newData) => (
+          <VisualWidget
+            template={(data) => <div class="asdasd">{data}</div>}
+            data={newData}
+          />
+        )}
+      </FilterWidget>
     </div>
   );
 };
 
-const store = {
-  state: { count: 0 },
-  onStateChanged: () => {},
-  setState(nextState) {
-    this.state = nextState;
-    onStateChanged();
-  },
-};
-
-mount(createVApp(store), document.getElementById("app"));
-
-// function onStateChanged() {
-//   app = patch(createVApp(store), app);
-// }
+DOM.mount(<App />, document.getElementById("app"));

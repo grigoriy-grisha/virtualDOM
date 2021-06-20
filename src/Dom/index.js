@@ -1,20 +1,26 @@
+import { instantiateComponent } from "../Reconsiler";
+
 class Dom {
-  constructor(node) {
-    this.node = node;
+  constructor() {
+    this.currentElement = null;
+    this.rootComponent = null;
+    this.isMount = false;
   }
 
-  find(selector) {
-    this.node = document.querySelector(selector);
-    return this;
-  }
+  mount(treeApp, containerNode) {
+    if (!this.isMount) {
+      this.currentElement = treeApp;
+      this.rootComponent = instantiateComponent(treeApp);
+      containerNode.appendChild(this.rootComponent.mount());
+      this.isMount = true;
+      return;
+    }
 
-  textNode(text) {
-    return document.createTextNode(text);
-  }
-
-  get element() {
-    return this.node;
+    if (this.isMount) {
+      this.rootComponent.receive(this.currentElement, treeApp);
+      this.currentElement = treeApp;
+    }
   }
 }
 
-export const $ = new Dom();
+export const DOM = new Dom();

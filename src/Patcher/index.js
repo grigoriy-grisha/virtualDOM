@@ -44,7 +44,7 @@ class Patcher {
       }
     }
 
-    if (nextValue == null || nextValue === false) {
+    if (nextValue == null) {
       node.removeAttribute(key);
       return;
     }
@@ -60,9 +60,9 @@ class Patcher {
   }
 
   patchChildren(parent, vChildren, nextVChildren) {
-    parent.childNodes.forEach((childNode, i) =>
-      this.patchNode(childNode, vChildren[i], nextVChildren[i])
-    );
+    parent.childNodes.forEach((childNode, i) => {
+      this.patchNode(childNode, vChildren[i], nextVChildren[i]);
+    });
 
     nextVChildren
       .slice(vChildren.length)
