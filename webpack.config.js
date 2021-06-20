@@ -39,7 +39,7 @@ const jsLoaders = () => {
 module.exports = {
   context: path.resolve(__dirname, "src"),
   mode: "development",
-  entry: ["@babel/polyfill", "./index.ts"],
+  entry: ["@babel/polyfill", "./index.jsx"],
   output: {
     filename: filename("js"),
     path: path.resolve(__dirname, "dist"),
@@ -94,6 +94,11 @@ module.exports = {
       },
       {
         test: /\.js$/,
+        exclude: /node_modules/,
+        use: jsLoaders(),
+      },
+      {
+        test: /\.jsx$/,
         exclude: /node_modules/,
         use: jsLoaders(),
       },
